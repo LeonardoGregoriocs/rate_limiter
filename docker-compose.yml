@@ -1,16 +1,31 @@
-version: '3.8'
+version: "3.8"
 
 services:
   redis:
-    image: redis:latest
-    container_name: redis
+    container_name: rate-limiter_redis
+    image: redis:7.2.4-alpine3.19
     ports:
       - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - default
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: redis-commander
+  api:
+    container_name: rate-limiter
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - "8081:8081"
+      - "8080:8080"
+    networks:
+      - default
     environment:
-      - REDIS_HOSTS=local:redis:6379
+      - REDIS_HOST=redis
+      - 6379:6379
+
+volumes:
+  redis-data:
+
+networks:
+  default:
